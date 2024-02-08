@@ -10,5 +10,5 @@ jobs:
       - name: Build and push the image
         run: |
           docker login --username easycase00 --password ${{secrets.ACCESS_TOKEN}} ghcr.io
-          docker build -t ghcr.io/easycase00/arithmetic-service: latest --file dockerfile.
-          docker push ghcr.io/easycase00/arithmetic-service: latest
+          docker build -t ghcr.io/easycase00/arithmetic-service:latest --file dockerfile.
+          docker push ghcr.io/easycase00/arithmetic-service:latest

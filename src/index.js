@@ -1,41 +1,27 @@
 const express = require('express');
-const cors = require('cors')
-const app= express();
+const cors = require('cors');
+const {add} = require("./arithmetica");
+const app = express();
+app.use(cors()); 
+const port = 3000; 
+app.get('/', (req, res) => {
+  res.send('Arithmetic service - Hello World!');
+}); 
 
-app.use(cors());
+app.get('/calculate/*', (req, res) => {
+  // Extracting expression from URL parameters
+  const expression = decodeURIComponent(req.params[0]);
 
-const port = 3000;
-
-app.get('/', (req, res)=> {
-    res.send('Arithmetic service - Hello World!');
-});
-
-app.get('/add/:n/:m', (req, res) => {
-    const num1 = parseInt(req.params.n);
-    const num2 = parseInt(req.params.m);
-    const sum = num1 + num2;
-    res.json(sum);
-});
-
-app.get('/subtract/:n/:m', (req, res) => {
-    const num1 = parseInt(req.params.n);
-    const num2 = parseInt(req.params.m);
-    const sum = num1 - num2;
-    res.json(sum);
-});
-
-app.get('/multiply/:n/:m', (req, res) => {
-    const num1 = parseInt(req.params.n);
-    const num2 = parseInt(req.params.m);
-    const sum = num1 * num2;
-    res.json(sum);
-});
-
-app.get('/divide/:n/:m', (req, res) => {
-    const num1 = parseInt(req.params.n);
-    const num2 = parseInt(req.params.m);
-    const sum = num1 / num2;
-    res.json(sum);
-});
-
+  // Evaluating the expression
+  let result;
+  try {
+      result
+      = eval
+      (expression);
+      res.json(result.toString());
+  } catch (error) {
+      res.status(400).send('Invalid expression');
+  }
+}); 
+ 
 app.listen(port);

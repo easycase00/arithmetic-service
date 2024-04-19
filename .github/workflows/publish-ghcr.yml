@@ -1,21 +1,32 @@
-
-name: Docker Image CI for GHCR
-
-on:
-    push
-
-jobs:
     build_and_publish:
         runs-on: ubuntu-latest
+        env:
+            VERSION: ${{ github.sha }}
+            CONTAINER_REGISTRY: ${{ secrets.AZURE_CONTAINER_REGISTRY }}
+            CONTAINER_REGISTRY_UN: ${{ secrets.CONTAINER_REGISTRY_UN }}
+            CONTAINER_REGISTRY_PW: ${{ secrets.CONTAINER_REGISTRY_PW }}
         steps:
             - uses: actions/checkout@v3
             - name: npm install
               run: npm ci
-            - name: run the unit tests
+            - name: run tests
               run: npm test
             - name: Build and push the image
               run: |
-                docker login --username easycase00 --password ${{secrets.ACCESS_TOKEN}} ghcr.io
-                docker build -t ghcr.io/easycase00/arithmetic-service:latest --file Dockerfile .  
-                docker push ghcr.io/easycase00/arithmetic-service:latest 
-
+                docker login --username easycase00 --password ${{secrets.ACCESS_TOKEN_DOCKER}} ghcr.io
+                docker build -t ghcr.io/easycase00/arithmetic-service:$VERSION --file DockerFile .
+                docker push ghcr.io/easycase00n/arithmetic-service:$VERSION
+            - name: Build and push the image to azure
+              run: |
+                docker login --username $CONTAINER_REGISTRY_UN --password $CONTAINER_REGISTRY_PW $CONTAINER_REGISTRY
+                docker tag ghcr.io/easycase00/arithmetic-service:$VERSION $CONTAINER_REGISTRY/arithmetic-service:$VERSION
+                docker push $CONTAINER_REGISTRY/arithmetic-service:$VERSION
+            
+            - uses: tale/kubectl-action@v1
+              with:
+                base64-kube-config: ${{ secrets.KUBE_CONFIG }}
+            - name: Deploy
+              run: |
+                chmod +x deploy.sh
+                ./deploy.sh
+            
